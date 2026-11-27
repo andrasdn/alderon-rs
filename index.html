@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="id"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Simulasi 3D Lini Produksi Atap Alderon RS</title>
+<style>
+:root{--bg:#e8ecf1;--pn:rgba(255,255,255,.93);--tx:#17202b;--mu:#586577;--ac:#c2410c;--bd:#cdd5df;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media(prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#0e131a;--pn:rgba(23,30,40,.93);--tx:#e6ebf2;--mu:#97a3b4;--ac:#f97316;--bd:#2a3543}}
+:root[data-theme="dark"]{--bg:#0e131a;--pn:rgba(23,30,40,.93);--tx:#e6ebf2;--mu:#97a3b4;--ac:#f97316;--bd:#2a3543}
+html,body{height:100%;margin:0}
+body{background:var(--bg);color:var(--tx);font:13px/1.4 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif;overflow:hidden;position:relative}
+canvas{display:block;width:100%;height:100%;touch-action:none}
+.pn{position:absolute;background:var(--pn);border:1px solid var(--bd);border-radius:10px;padding:10px 12px}
+#hud{top:10px;left:10px;width:min(270px,calc(100% - 22px))}
+#hud h1{font-size:15px;margin:0 0 2px}
+.mu{color:var(--mu)}
+.g{display:grid;grid-template-columns:1fr auto;gap:2px 10px;margin:8px 0}
+.g b{text-align:right;font-variant-numeric:tabular-nums}
+#bar{height:6px;border-radius:3px;background:var(--bd);overflow:hidden;margin-bottom:8px}
+#bar i{display:block;height:100%;width:0;background:var(--ac)}
+.r{display:flex;gap:6px;flex-wrap:wrap;align-items:center;margin-top:6px}
+.b{border:1px solid var(--bd);background:transparent;color:var(--tx);border-radius:7px;padding:4px 9px;font:inherit;cursor:pointer}
+.b:focus-visible,input:focus-visible{outline:2px solid var(--ac);outline-offset:1px}
+input[type=range]{flex:1;min-width:80px;accent-color:var(--ac)}
+#st{left:10px;right:10px;bottom:10px;display:flex;gap:6px;overflow-x:auto;white-space:nowrap;padding:8px}
+.c{border:1px solid var(--bd);border-radius:99px;padding:3px 10px;color:var(--mu);flex:none}
+.c.on{background:var(--ac);border-color:var(--ac);color:#fff}
+.tg{position:absolute;font-size:11px;padding:1px 6px;border-radius:5px;background:var(--pn);border:1px solid var(--bd);transform:translate(-50%,-100%);pointer-events:none;white-space:nowrap}
+.dm{border-color:var(--ac);color:var(--ac);font-weight:600}#ar{top:10px;right:10px;width:min(260px,calc(100% - 22px));font-size:12px}#ar table{width:100%;border-collapse:collapse;margin-top:4px}#ar td:last-child{text-align:right;font-variant-numeric:tabular-nums;white-space:nowrap}@media(max-width:700px){#ar{top:auto;bottom:62px;font-size:11px}}
+#mo{top:auto;bottom:62px;right:10px;width:min(370px,calc(100% - 22px));max-height:calc(100% - 430px);min-height:120px;overflow:auto;font-size:11px}#mo.off{display:none}#mo table{width:100%;border-collapse:collapse;margin:4px 0}#mo td{padding:1px 3px 1px 0;vertical-align:top}#mo td:last-child{text-align:right;white-space:nowrap}.bgt{border-color:#b7791f;color:#b7791f;font-weight:600}@media(max-width:700px){#mo{top:70px;bottom:auto;max-height:60%;z-index:5}}
+</style></head><body>
+<div id="hud" class="pn"><h1>Lini produksi atap Alderon RS</h1><div class="mu">Simulasi kontinu: extruder sampai pallet</div>
+<div class="g"><span class="mu">Sheet di meja potong</span><b id="v1">0,00 / 6,00 m</b></div><div id="bar"><i></i></div>
+<div class="g"><span class="mu">Kecepatan lini</span><b>2,25 m/menit</b><span class="mu">Waktu produksi</span><b id="v7">0 j 00 m 00 d</b><span class="mu">Sheet ditandai laser</span><b id="v6">0</b><span class="mu">Sheet terpotong</span><b id="v2">0</b><span class="mu">Sheet berlabel</span><b id="v3">0</b><span class="mu">Bundel isi 5 lembar</span><b id="v4">0</b><span class="mu">Pallet penuh (10 bundel)</span><b id="v5">0</b><span class="mu">Jarak jatuh sheet</span><b>75 mm</b><span class="mu">Meja angkat turun</span><b id="v8">0,0 mm</b></div>
+<div class="mu" style="font-size:12px">Profil 29 mm, tebal 2 mm; 5 lembar tersusun = 39 mm. 1 lembar 6 m = 2 mnt 40 dtk, bundel 5 lembar = 13 mnt 20 dtk, pallet 10 bundel = 2 j 13 mnt 20 dtk.</div><div class="mu" style="font-size:12px;margin-top:4px"><b>Alas atap:</b> rol PU anti-gores (setelah gunting), rol PU pada meja angkat, belt PU (packing). <b>Turun di susun:</b> rol tepi berayun 90° seperti pintu (engsel di sisi luar, 2 silinder pneumatik + batang penghubung, tanpa tambahan lebar), sheet jatuh 75 mm; meja angkat rol (3 screw jack servo) turun 2,5 mm per lembar = 12,5 mm, lalu rolnya berputar membawa bundel ke belt packing tanpa pendorong. <b>Pallet:</b> scissor lift turun 41 mm per bundel, belt datar tanpa apron.</div><div class="mu" id="sx" style="min-height:2.8em"></div><div class="r"><button class="b" id="pz">Jeda</button><label class="mu" for="sp">Percepatan animasi</label><input id="sp" type="range" min=".5" max="3" step=".1" value="1"><b id="tl">×40</b></div>
+<div class="r" id="cm"></div></div>
+<div id="ar" class="pn"></div>
+<div id="mo" class="pn"></div>
+<div id="st" class="pn"></div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+const T=THREE,DK=matchMedia('(prefers-color-scheme:dark)').matches;
+const R=new T.WebGLRenderer({antialias:true,alpha:true});R.setPixelRatio(Math.min(devicePixelRatio,2));R.shadowMap.enabled=true;document.body.prepend(R.domElement);const D=R.domElement;
+const S=new T.Scene(),C=new T.PerspectiveCamera(38,1,.1,400);
+S.add(new T.HemisphereLight(0xffffff,DK?0x334455:0x99a3b0,.85));
+const dl=new T.DirectionalLight(0xffffff,.9);dl.position.set(10,34,22);dl.target.position.set(-2,0,0);dl.castShadow=true;dl.shadow.mapSize.set(2048,2048);Object.assign(dl.shadow.camera,{left:-42,right:42,top:24,bottom:-24,far:90});S.add(dl,dl.target);
+const M=(c,r=.5,m=.3,o={})=>new T.MeshStandardMaterial({color:c,roughness:r,metalness:m,...o});
+const bx=(w,h,d,c,x,y,z,p=S)=>{const m=new T.Mesh(new T.BoxGeometry(w,h,d),typeof c=='number'?M(c):c);m.position.set(x,y,z);m.castShadow=m.receiveShadow=true;p.add(m);return m};
+const cy=(r,l,c,x,y,z,ax='x',p=S,sg=24)=>{const g=new T.CylinderGeometry(r,r,l,sg);if(ax=='x')g.rotateZ(Math.PI/2);if(ax=='z')g.rotateX(Math.PI/2);const m=new T.Mesh(g,typeof c=='number'?M(c):c);m.position.set(x,y,z);m.castShadow=true;p.add(m);return m};
+const cv=(w,h,f)=>{const c=document.createElement('canvas');c.width=w;c.height=h;f(c.getContext('2d'),w,h);return new T.CanvasTexture(c)};
+const fs=new T.Shape();fs.moveTo(-77,-22);fs.lineTo(73,-22);fs.lineTo(73,22);fs.lineTo(-77,22);fs.closePath();const ho=new T.Path();ho.moveTo(12.4,-1);ho.lineTo(19.6,-1);ho.lineTo(19.6,1);ho.lineTo(12.4,1);ho.closePath();
+const fl=new T.Mesh(new T.ShapeGeometry(fs),M(DK?0x1a222c:0xd2d8e0,1,0));fl.rotation.x=-Math.PI/2;fl.position.y=.1;fl.receiveShadow=true;S.add(fl);
+const gh=new T.GridHelper(150,75,0x8896a6,0x8896a6);gh.material.transparent=true;gh.material.opacity=.14;gh.position.set(-2,.11,0);S.add(gh);
+const gray=M(0x707b88,.6,.5),blue=M(0x2f6fb0,.5,.3),dk=M(0x2a3139,.6,.4),steel=M(0xb9c2cd,.35,.8),org=M(0xe8590c,.5,.3),wood=M(0x9b7a4b,.9,0),pum=M(0x1f9d8a,.7,.1),felt=M(0xece6d6,1,0),hot=M(0xff5a1f,.4,.2,{emissive:0xff3d00,emissiveIntensity:.6}),hj=M(0xff5a1f,.4,.2,{emissive:0xff3d00,emissiveIntensity:.6});
+const brg=[],gold=M(0xffc400,.35,.5,{emissive:0x553800,emissiveIntensity:.4}),bb=(x,y,z,p=S,s=1)=>{const m=bx(.08*s,.06*s,.06*s,gold,x,y,z,p);brg.push(m);return m};
+const bt=cv(64,8,(g,w,h)=>{g.fillStyle='#2b3138';g.fillRect(0,0,w,h);g.fillStyle='#48525d';g.fillRect(0,0,w/2,h)});bt.wrapS=T.RepeatWrapping;bt.repeat.set(12,1);
+const belt=M(0xffffff,.8,.1,{map:bt});
+const lt=cv(256,128,g=>{g.fillStyle='#fff';g.fillRect(0,0,256,128);g.fillStyle='#d9480f';g.fillRect(0,0,256,34);g.fillStyle='#fff';g.font='bold 22px sans-serif';g.fillText('ALDERON RS',12,25);g.fillStyle='#111';g.font='bold 32px sans-serif';g.fillText('uPVC 6 m',14,78);g.font='16px sans-serif';g.fillText('Atap gelombang',14,110)});
+const labMat=new T.MeshBasicMaterial({map:lt});
+const dieX=-17.9,cutX=-6,LX=-2.85,SX=-2.85,MX=2.5,XA=6,PX=XA+3.3,LPX=-7.6,LBX=LX+1.6,LY=1,SY=.9125,T0=.925,RL=.8,NB=10;
+// profil sheet (penampang di bidang YZ, panjang sepanjang sumbu X)
+const W=1.05,TH=.002,H=.029,pts=[];for(let i=0;i<5;i++){const z=-W/2+i*W/5,u=W/5;pts.push([z,0],[z+u*.2,0],[z+u*.3,H],[z+u*.7,H],[z+u*.8,0])}pts.push([W/2,0]);
+const sh=new T.Shape();sh.moveTo(pts[0][0],0);pts.forEach(p=>sh.lineTo(p[0],p[1]));[...pts].reverse().forEach(p=>sh.lineTo(p[0],p[1]+TH));sh.closePath();
+const SG=new T.ExtrudeGeometry(sh,{depth:1,bevelEnabled:false});SG.translate(0,0,-.5);SG.rotateY(Math.PI/2);
+const sheetMat=M(0xb8452c,.55,.05),filmMat=M(0xffffff,.1,0,{transparent:true,opacity:.28,depthWrite:false});
+// ===== Mesin hulu: extruder, die, vakum kalibrator, haul-off =====
+bx(7.5,.6,1.7,gray,-23,.3,0);cy(.42,6,steel,-22.5,1,0);
+const hm=M(0xe8590c,.5,.3,{emissive:0xff4400,emissiveIntensity:.4});for(let i=0;i<4;i++)cy(.47,.55,hm,-24.6+i*1.5,1,0);
+const hop=new T.Mesh(new T.CylinderGeometry(.8,.25,1.1,4).rotateY(Math.PI/4),M(0x8d99a6,.5,.5));hop.position.set(-24.3,2.1,0);hop.castShadow=true;S.add(hop);bx(1.1,.05,1.1,0xf4f4f4,-24.3,2.62,0);
+bx(1.8,1.3,1.4,blue,-26.4,1,0);bx(1.2,1,1.1,dk,-25.2,1,0);const fan=cy(.45,.1,steel,-27.35,1,0);for(let i=0;i<6;i++)bx(.1,.14,1.4,steel,-27+i*.28,1.72,0);
+[0x2ecc71,0xf5c400,0xe03131].forEach((c,i)=>bx(.18,.18,.18,M(c,.4,0,{emissive:c,emissiveIntensity:i?.1:.8}),-21,2.0+i*.2,1.6));
+const pel=[...Array(8)].map((_,i)=>bx(.07,.07,.07,0xf4f4f4,-24.3+(Math.random()-.5)*.4,1.6+i*.12,(Math.random()-.5)*.4));
+cy(.6,.08,steel,-18.9,1,0);[-.9,.9].forEach(z=>cy(.07,5.8,steel,-14.4,.2,z));[-2.4,2.4].forEach(z=>bx(44,.012,.1,M(0xf5c400,.8,0),-7,.12,z));
+bx(1,1.9,.6,0xe9ecef,-21,.95,1.6);bx(.5,.35,.05,M(0x2ecc71,.3,0,{emissive:0x2ecc71,emissiveIntensity:.7}),-21,1.4,1.91);
+cy(.3,.7,steel,-19.2,1,0);bx(.9,.8,1.5,dk,-18.4,1,0);bx(.1,.12,1.3,steel,-17.95,1,0);
+bx(6,.9,1.6,blue,-14.4,.45,0);bx(5.8,.04,1.5,0x6ec1ff,-14.4,.92,0);
+bx(6,.55,1.6,M(0x9fd0ff,.1,.1,{transparent:true,opacity:.27,depthWrite:false}),-14.4,1.2,0);
+cy(.45,1.1,gray,-14.4,.55,1.5,'y');cy(.07,1.1,steel,-14.4,1.15,1.25,'z');
+const rl=[];[-10.3,-8.3].forEach(x=>[1.22,.78].forEach(y=>rl.push(cy(.13,1.4,steel,x,y,0,'z'))));
+bx(2.2,.22,1.3,belt,-9.3,1.22,0);bx(2.2,.22,1.3,belt,-9.3,.78,0);[-9.9,-8.7].forEach(x=>cy(.08,.7,steel,x,1.7,0,'y'));[-.95,.95].forEach(z=>bx(2.4,2.2,.15,dk,-9.3,1.1,z));
+// laser print sebelum gunting + encoder panjang
+const enc=cy(.16,.18,org,-6.9,1.24,.4,'z');bx(.06,.6,.06,steel,-6.9,1.6,.4);
+[-1.1,1.1].forEach(z=>bx(.25,2.2,.25,gray,LPX,1.1,z));bx(.3,.22,2.6,dk,LPX,2.2,0);bx(.9,1.7,.6,0xe9ecef,LPX-.9,.85,1.7);bx(.4,.3,.04,M(0x3b82f6,.3,0,{emissive:0x3b82f6,emissiveIntensity:.6}),LPX-.9,1.4,2.02);
+const lh=new T.Group();S.add(lh);lh.position.x=LPX;bx(.5,.45,.5,M(0x1c5fb8,.4,.4),0,1.85,0,lh);cy(.11,.35,steel,0,1.5,0,'y',lh);
+const lzb=cy(.012,1,M(0xff2a2a,.3,0,{emissive:0xff0000,emissiveIntensity:1.5}),0,1.2,0,'y',lh);lzb.scale.y=.47;lzb.position.y=1.27;lzb.visible=false;
+const lp=new T.PointLight(0xff3030,0,3);lp.position.set(0,1.15,0);lh.add(lp);
+const mt=cv(256,48,g=>{g.fillStyle='#fff4d6';g.font='bold 26px sans-serif';g.fillText('ALDERON RS  uPVC  6 m',8,32)}),MG=new T.PlaneGeometry(1.1,.21).rotateX(-Math.PI/2);
+// ===== Gunting guillotine: kereta ikut produk, pisau naik-turun =====
+[-1.3,1.3].forEach(z=>bx(.3,2.4,.3,gray,cutX,1.2,z));bx(.35,.25,2.9,dk,cutX,2.3,0);[-.8,.8].forEach(z=>bx(2.6,.12,.12,dk,cutX+.5,2.3,z));
+const cg=new T.Group();S.add(cg);[-.8,.8].forEach(z=>cy(.07,.4,dk,cutX,1.95,z,'y',cg));
+const sc=new T.Group();sc.position.set(cutX,1.35,0);cg.add(sc);bx(.05,.12,1.6,steel,0,.06,0,sc);bx(.16,.3,1.7,org,0,.27,0,sc);[-.8,.8].forEach(z=>cy(.03,.6,steel,0,.5,z,'y',sc));
+bx(.12,.07,1.8,steel,cutX,.975,0,cg);const cb=bx(.3,.1,1.3,dk,cutX-.5,1.6,0,cg);
+// ===== Konveyor pendek (setelah gunting) + meja rol di stasiun label/susun =====
+
+for(let x=-8;x<=-6.3;x+=.6){cy(.05,1.5,pum,x,.95,0,'z',S,8);[-1,1].forEach(z=>bb(x,.95,z*.78))}
+[-1,1].forEach(a=>[-1,1].forEach(b=>bx(.12,1.3,.12,gray,SX+a*3.3,.65,b*.85)));const jp=[-1,1].map(s=>bx(5.8,.1,.05,steel,SX,1,s*.85));
+// pelabelan tepat di atas stasiun susun
+[-1,1].forEach(z=>bx(.25,2.3,.25,gray,LBX,1.15,z));bx(.3,.25,2.3,gray,LBX,2.3,0);cy(.28,.3,0xffffff,LBX+.4,2.55,0,'z');
+const lm=M(0x333333,.4,0,{emissive:0x00ff55,emissiveIntensity:0}),lamp=new T.Mesh(new T.SphereGeometry(.13,12,8),lm);lamp.position.set(LBX,2.6,1);S.add(lamp);bx(.12,.3,.12,dk,LBX,2.43,1);
+const pad=bx(.6,.1,.35,org,LBX,1.95,0),rod=cy(.05,1,steel,LBX,2.1,0,'y');
+// meja susun bawah, pendorong, mesin packing tarik-lipat, pallet
+bx(XA-1-RL,.04,1.5,belt,(1+RL+XA)/2,.78,0);const rp=bx(1,.04,1.5,belt,1+RL/2,(SY+.8)/2-.02,0);rp.scale.x=Math.hypot(RL,SY-.8);rp.rotation.z=Math.atan((.8-SY)/RL);
+const AX=[];for(let x=-5.8;x<=.3;x+=.6)AX.push(x);const arms=[];
+const rails=[-1,1].map(s=>{const lk=new T.Group();S.add(lk);bx(6.2,.03,.03,steel,-2.8,.95,s*.76,lk);cy(.02,.75,steel,.725,.95,s*.76,'x',lk);cy(.04,.5,dk,1.2,.95,s*.76,'x');bx(6.2,.05,.05,dk,-2.8,.9,s*.71);
+ AX.forEach(x=>{const a=new T.Group();a.position.set(x,0,s*.68);a.userData.s=s;S.add(a);rl.push(cy(.02,.25,pum,0,.98,-s*.15,'z',a,10));bx(.04,.03,.3,dk,0,.95,-s*.15,a);cy(.015,.1,steel,0,.95,0,'y',a);bb(0,.935,0,a,.9);bb(0,.98,-s*.02,a,.55);bb(0,.98,-s*.28,a,.55);arms.push(a)});return lk});
+const lf=new T.Group(),tr=[];S.add(lf);lf.position.y=T0;for(let x=-5.9;x<=.95;x+=.5){tr.push(cy(.03,.6,pum,x,-.03,0,'z',lf,12));[-1,1].forEach(z=>bb(x,-.07,z*.325,lf,1.2))}[-1,1].forEach(z=>bx(6.9,.06,.06,dk,-2.5,-.09,z*.33,lf));bx(.3,.25,.25,blue,1,-.2,-.5,lf);[-5,-2.5,0].forEach(x=>{bx(.3,.5,.3,blue,x,.45,0);cy(.05,.6,steel,x,-.35,0,'y',lf)});
+cy(.07,1.5,steel,XA,.8,0,'z');bx(.4,.35,.35,blue,XA,.5,1);[-1,1].forEach(z=>bb(XA,.8,z*.78,S,1.3));
+const SLL=1.6,slA=[];[-1,1].forEach(z=>[-1,1].forEach(d=>{const a=bx(SLL,.07,.08,steel,PX,.3,z*.55);a.userData.d=d;slA.push(a)}));bx(SLL+.3,.08,1.6,dk,PX,.04,0);const slP=bx(6.2,.06,1.5,dk,PX,.6,0);const slB=[-1,1].map(z=>{const m=cy(.05,.14,gold,PX,.3,z*.55,'z');brg.push(m);return m});for(let x=1;x<=6;x+=3.5)bx(.2,.8,1.4,dk,x,.5,0);[-.35,.35].forEach(z=>{bx(XA-1-RL,.01,.1,0xf1f5f9,(1+RL+XA)/2,.805,z)});
+
+[-1,1].forEach(z=>bx(.5,1.9,.3,gray,MX,.95,z*.95));bx(.5,.25,2.2,dk,MX,1.95,0);bx(2.6,.2,.3,dk,MX+.6,2.2,0);
+const fr=cy(.28,1.3,0xffffff,MX-.35,2.35,0,'z');bx(.015,1.45,1.2,filmMat,MX,1.2,0);const fb=cy(.25,1.3,0xffffff,MX-.35,.35,0,'z');bx(.015,.45,1.2,filmMat,MX,.55,0);[-1,1].forEach(z=>bx(2.2,.05,.07,hot,MX+1.5,.85,z*.6));[[MX-.35,2.35],[MX-.35,.35],[MX+.1,.95],[MX+1.8,.95]].forEach(([x,y])=>[-1,1].forEach(z=>bb(x,y,z*.68,S,1.4)));
+[-1,1].forEach(z=>bx(1,.3,.05,steel,MX+.4,.95,z*.72));cy(.1,1.3,steel,MX+.1,.95,0,'z');
+const seal=bx(.3,.15,1.4,hj,MX+1.2,1.3,0);const pr=cy(.1,1.3,dk,MX+1.8,.95,0,'z');bx(.3,.03,1.4,hj,MX+1.2,.815,0);
+
+bx(6.6,.5,1.5,wood,PX,.35,-6);bx(7,.012,2,M(0xf5c400,.8,0),PX,.12,6);
+function mkPallet(){const g=new T.Group();bx(6.6,.12,1.5,wood,0,.06,0,g);g.userData.n=0;S.add(g);return g}
+let Y=.66,pl=null,pf=null,pg=mkPallet();pg.position.set(PX,Y,0);
+const yT=()=>.78,RP=x=>x<=1?SY:x<1+RL?SY+(.8-SY)*(x-1)/RL:x<XA?.8:yT();
+// ===== Simulasi =====
+const FG=new T.BoxGeometry(1,.05,1.14).translate(-.5,0,0),SM=new T.BoxGeometry(1,.054,.03).translate(-.5,0,0),ES=new T.BoxGeometry(.04,.056,1.14),PG=new T.PlaneGeometry(.6,.3).rotateX(-Math.PI/2),BG=new T.PlaneGeometry(.9,.45).rotateX(-Math.PI/2);
+const strand=new T.Mesh(SG,sheetMat);strand.castShadow=true;S.add(strand);
+let pieces=[],bundles=[],pallet=[],sp=1,pz=false,head=dieX,cut=null,cur=null,pt=0,E=0,mk=[],prn=null,lpd=false,trig=0,jg=null;const cn={t:0,c:0,l:0,b:0,p:0},clk=new T.Clock(),cl=(v,a,b)=>Math.max(a,Math.min(b,v)),ez=k=>k*k*(3-2*k);
+function mkPiece(){const g=new T.Group(),m=new T.Mesh(SG,sheetMat);m.scale.x=6;m.castShadow=true;g.add(m);const l=new T.Mesh(PG,labMat);l.position.set(1.6,.035,0);l.visible=false;g.add(l);g.userData.l=l;g.position.set(cutX+3,LY,0);S.add(g);return{g,x:cutX+3,s:0,t:0}}
+function mkBundle(){const g=new T.Group();g.position.set(SX,T0,0);const f=new T.Mesh(FG,filmMat);f.position.set(3,.02,0);f.scale.x=.0001;g.add(f);const lb=new T.Mesh(BG,labMat);lb.position.y=.05;lb.visible=false;g.add(lb);S.add(g);const fe=new T.Mesh(ES,hot),re=new T.Mesh(ES,hot);fe.position.set(3,.02,0);re.position.set(-3.05,.02,0);fe.visible=re.visible=false;g.add(fe,re);[-1,1].forEach(s=>{const q=new T.Mesh(SM,hot);q.position.z=s*.55;f.add(q)});return{g,f,lb,fe,re,n:0,d:0,st:0,t:0,ld:0,lo:0}}
+function loop(){requestAnimationFrame(loop);
+const rd=Math.min(clk.getDelta(),.05),dt=pz?0:rd*sp,A={e:1,d:1,v:1,h:1},el=clk.elapsedTime;
+head+=1.5*dt;E+=40*dt;
+if(!cut&&head-cutX>=4.95)cut={t:0};
+if(cut){A.c=1;cut.t+=dt/.7;const ct=Math.min(cut.t,1);cg.position.x=1.05*ct;sc.position.y=ct<.35?1.35:ct<.65?1.35-.34*ez((ct-.35)/.3):ct<.85?1.01:1.01+.34*ez((ct-.85)/.15);
+ if(cut.t>=1){const np=mkPiece();pieces.push(np);mk=mk.filter(m=>{if(m.position.x<cutX)return true;np.g.add(m);m.position.set(m.position.x-cutX-3,.035,0);return false});head-=6;cn.c++;trig=1;lpd=false;cut=null}}
+else{sc.position.y+=(1.35-sc.position.y)*Math.min(1,dt*8);cg.position.x+=(0-cg.position.x)*Math.min(1,dt*6)}
+cb.position.y+=((cut?1.085:1.6)-cb.position.y)*Math.min(1,dt*12);
+if(!lpd&&!prn&&head>=cutX+1.4){const tx=mt.clone();tx.needsUpdate=true;const m=new T.Mesh(MG,new T.MeshBasicMaterial({map:tx,transparent:true,opacity:1,depthWrite:false}));m.scale.x=.001;m.position.set(LPX,LY+.035,0);S.add(m);mk.push(m);prn={t:0,m,tx};lpd=true}
+for(const m of mk)if(!prn||prn.m!==m)m.position.x+=1.5*dt;
+if(prn){A.t=1;prn.t+=dt/.7333;const r=cl(prn.t,.001,1);prn.m.scale.x=r;prn.m.position.x=LPX+.55*r;prn.tx.repeat.set(r,1);prn.tx.offset.set(1-r,0);lzb.visible=prn.t<1;lp.intensity=lzb.visible?1+Math.random():0;if(prn.t>=1){cn.t++;prn=null}}
+if(jg){jg.t+=dt/.4;const o=.85-.22*Math.sin(Math.PI*Math.min(jg.t,1));jp[0].position.z=-o;jp[1].position.z=o;if(jg.t>=1)jg=null}
+const len=Math.max(.001,head-dieX);strand.scale.x=len;strand.position.set(dieX+len/2,LY,0);
+let rr=0;for(const p of pieces){
+ if(p.s==0){p.x+=3*dt;if(p.x>=LX){p.x=LX;p.s=1;p.t=0}}
+ else if(p.s==1){A.l=1;p.t+=dt/1.2;const k=p.t<.35?p.t/.35:p.t<.65?1:(1-p.t)/.35;pad.position.y=1.95-.8*cl(k,0,1);if(p.t>.5){p.g.userData.l.visible=true;trig=0}
+  if(p.t>=1&&Math.abs(lf.position.y-(cur?cur.g.position.y:T0))<.002){cn.l++;if(!cur)cur=mkBundle();p.b=cur;p.n=cur.n++;cur.g.add(p.g);p.g.position.set(0,LY-cur.g.position.y,0);if(cur.n>=5){bundles.push(cur);cur=null}p.s=3;p.t=0}}
+ else if(p.s==3){A.s=1;p.t+=dt/.8;const t=Math.min(p.t,1),eD=ez(cl((t-.3)/.25,0,1)),eL=ez(cl((t-.6)/.4,0,1));rr=t<.25?ez(t/.25):t<.55?1:t<.85?1-ez((t-.55)/.3):0;p.b.g.position.y=T0-.0025*(p.n+eL);p.g.position.y=(LY-T0)*(1-eD)+.0025*p.n;if(p.t>=1){p.s=4;jg={t:0};if(++p.b.d>=5)p.b.st=1}}
+ if(p.s<2)p.g.position.x=p.x}
+pieces=pieces.filter(p=>p.s<4);
+rod.position.y=(pad.position.y+2.3)/2;rod.scale.y=2.3-pad.position.y;
+let sk=0,pb=null;
+for(const b of bundles){const g=b.g,x=g.position.x;
+ if(b.st==1){A.p=1;A.r=1;pb=b;b.v=Math.min(4,(b.v||0)+dt*8);g.position.x+=b.v*dt;b.f.scale.x=cl(x+3-MX,.0001,6.05);b.fe.visible=x+3>MX;if(x+3>MX)A.w=1;if(x>=3.9)b.st=2}
+ else if(b.st==2){A.w=1;g.position.x+=2*dt;b.f.scale.x=cl(x+3-MX,.0001,6.05);b.fe.visible=true;if(x>=MX+4.2){b.st=3;b.t=0}}
+ else if(b.st==3){A.w=1;A.k=1;b.t+=dt/.9;sk=Math.sin(Math.PI*Math.min(b.t,1));if(b.t>=1){b.st=4;b.lb.visible=true;b.re.visible=true}}
+ else if(b.st==4){A.p=1;g.position.x+=2.5*dt;if(x>=PX){g.position.x=PX;g.rotation.z=0;g.position.y=yT();pg.attach(g);b.st=6;cn.b++;if(++pg.userData.n>=NB)pf={s:1}}}
+ else if(b.st==5){A.p=1;b.t+=dt/.7;Y=pl.y0-.5*ez(Math.min(b.t,1));if(b.t>=1){b.st=6;cn.b++;if(++pg.userData.n>=4)pf={s:0}}}}
+for(const b of bundles)if(b.st>0&&b.st<5){const x=b.g.position.x,hf=RP(x+3),hr=RP(x-3);b.g.position.y=(hf+hr)/2+b.lo;b.g.rotation.z=Math.atan((hf-hr)/6)}
+let la=0;for(const b of bundles)if(b.st>0&&b.st<5&&b.g.position.x<3.9)la=1;const cb2=cur||bundles.find(b=>b.st==0),TT=la?SY:(cb2?cb2.g.position.y:T0);lf.position.y+=(TT-lf.position.y)*Math.min(1,dt*(la||cb2?40:5));rails.forEach(l=>l.position.x=.3*rr);arms.forEach(a=>a.rotation.y=-a.userData.s*(Math.PI/2)*rr);if(A.r)tr.forEach(r=>r.rotation.z-=dt*10);
+
+seal.position.y=1.3-.4*sk;hj.emissiveIntensity=.6+1.6*sk;
+if(pf){A.p=1;if(pf.s==0){pf.s=1}else if(pf.s==1){pg.position.z+=3*dt;if(pg.position.z>=6){S.remove(pg);pg=mkPallet();pg.position.set(PX,Y,-6);cn.p++;pf.s=2}}else if(pf.s==2){pg.position.z=Math.min(0,pg.position.z+3*dt);if(pg.position.z>=0)pf.s=3}else if(pf.s==3){Y=Math.min(.66,Y+.6*dt);if(Y>=.66)pf=null}}else Y+=(.66-.041*pg.userData.n-Y)*Math.min(1,dt*3);
+pg.position.y=Y;const th=Math.asin(Math.min(.98,Y/SLL));slA.forEach(a=>{a.position.y=Y/2;a.rotation.z=a.userData.d*th});slP.position.y=Y-.03;slB.forEach(m=>m.position.y=Y/2);bundles=bundles.filter(b=>b.st<6);
+bt.offset.x-=dt*.35;rl.forEach(r=>r.rotation.z+=dt*8);fan.rotation.x+=dt*10;enc.rotation.z-=dt*9;if(A.w){fr.rotation.z+=dt*3;fb.rotation.z+=dt*3;pr.rotation.z-=dt*3}pel.forEach(m=>{m.position.y-=dt*.6;if(m.position.y<1.55)m.position.y=2.55});hm.emissiveIntensity=.35+.2*Math.sin(el*3);
+const hl=cl(head-cutX,0,6);
+v1.textContent=hl.toFixed(2).replace('.',',')+' / 6,00 m';bar.firstChild.style.width=hl/6*100+'%';v6.textContent=cn.t;v7.textContent=Math.floor(E/3600)+' j '+String(Math.floor(E%3600/60)).padStart(2,'0')+' m '+String(Math.floor(E%60)).padStart(2,'0')+' d';v8.textContent=((T0-lf.position.y)*1000).toFixed(1).replace('.',',')+' mm';v2.textContent=cn.c;v3.textContent=cn.l;v4.textContent=cn.b;v5.textContent=cn.p;
+sx.textContent=prn?'Laser print diam di tempat: logo dan kode tercetak bertahap saat sheet lewat':cut?'Kereta gunting ikut bergerak bersama sheet, penjepit menahan, pisau turun memotong tepat 6 m':A.l?'Applicator menempel label pada sheet':trig>0?'Trigger: gunting selesai, label disiapkan':A.r?'Rol meja berputar (motor gearbox + rantai) membawa tumpukan 5 lembar ke belt packing, tanpa pendorong':A.s?'Rol tepi berayun seperti pintu (90°, tanpa tambahan lebar), sheet jatuh 75 mm ke tumpukan; meja angkat turun 2,5 mm':A.k?'Potong film + seal sekaligus: ekor bundel tertutup, ujung depan film berikutnya ikut tertutup':A.w?'Film atas dan bawah ditarik, dilipat, kedua pinggir di-seal; ujung depan sudah tertutup':pf?(pf.s==1?'Pallet penuh digeser ke zona forklift':pf.s==3?'Scissor lift naik ke posisi terima bundel':'Pallet kosong masuk dari magazine'):A.p?(pb?'Rol meja dan belt membawa tumpukan ke mesin packing':'Belt membawa bundel ke pallet di atas scissor lift (turun 41 mm per bundel)'):'Sheet ditarik haul-off menuju laser print dan gunting';lm.emissiveIntensity=trig>0?1.6:0;
+chips.forEach(([k,e])=>e.classList.toggle('on',!!A[k]));
+for(const k in Cc)Cc[k]+=(G[k]-Cc[k])*Math.min(1,rd*5);
+C.position.set(Cc.tx+Cc.d*Math.sin(Cc.az)*Math.cos(Cc.el),Cc.ty+Cc.d*Math.sin(Cc.el),Cc.tz+Cc.d*Math.cos(Cc.az)*Math.cos(Cc.el));C.lookAt(Cc.tx,Cc.ty,Cc.tz);
+tags.forEach(([v,e])=>{const p=v.clone().project(C);e.style.display=p.z<1&&(!e.dm||dmOn)&&(!e.bg||bgOn)?'':'none';e.style.left=(p.x*.5+.5)*innerW+'px';e.style.top=(-p.y*.5+.5)*innerH+'px'});
+R.render(S,C)}
+// ===== UI & kamera =====
+const $=id=>document.getElementById(id),v1=$('v1'),v2=$('v2'),v3=$('v3'),v4=$('v4'),v5=$('v5'),v6=$('v6'),v7=$('v7'),v8=$('v8'),tl=$('tl'),sx=$('sx'),bar=$('bar');
+const chips=[['e','Ekstruder'],['d','Die'],['v','Vakum kalibrator'],['h','Haul-off'],['t','Laser print (diam)'],['c','Gunting naik-turun 6 m'],['l','Label (setelah gunting)'],['s','Rol tepi berayun (pintu) + sheet jatuh 75 mm'],['r','Rol meja bawa bundel (tanpa pendorong)'],['w','Tarik-lipat atas/bawah + seal pinggir'],['k','Potong + seal film'],['p','Belt ke pallet (scissor lift)']].map(([k,t])=>{const e=document.createElement('span');e.className='c';e.textContent=t;$('st').appendChild(e);return[k,e]});
+const tags=[[-22.5,3,0,'Extruder'],[-18.4,1.9,0,'Die'],[-14.4,2.1,0,'Vakum kalibrator'],[-9.3,2.4,0,'Haul-off'],[LPX,2.9,0,'Laser print (diam)'],[cutX,2.8,0,'Gunting guillotine (pisau naik-turun)'],[LBX,2.9,0,'Label (setelah gunting) + susun 5 lembar'],[MX,2.7,0,'Packing tarik-lipat'],[PX,1.9,0,'Pallet di atas scissor lift'],[PX,1.1,-6,'Magazine pallet'],[PX,1.1,6,'Zona forklift'],[-2.7,.5,.9,'Meja angkat rol PU (screw jack servo)'],[-2.8,1.15,-.9,'Rol tepi berayun seperti pintu']].map(([x,y,z,t])=>{const e=document.createElement('div');e.className='tg';e.textContent=t;document.body.appendChild(e);return[new T.Vector3(x,y,z),e]});
+const ST=[['Ekstruder',-22.5],['Die',-18.4],['Vakum',-14.4],['Haul-off',-9.3],['Laser',LPX],['Gunting',cutX],['Label+susun',SX],['Packing',MX],['Pallet',PX]],AX0=-27.9,AX1=PX+3.3,AZ0=-6.75,AZ1=7,f1=v=>v.toFixed(1).replace('.',',');
+const dg=new T.Group(),dmat=new T.LineBasicMaterial({color:0xe8590c});S.add(dg);let dmOn=true;
+const sg=p=>dg.add(new T.LineSegments(new T.BufferGeometry().setFromPoints(p.map(q=>new T.Vector3(...q))),dmat));
+const dim=(x1,z1,x2,z2,t)=>{sg([[x1,.14,z1],[x2,.14,z2]]);const e=document.createElement('div');e.className='tg dm';e.textContent=t;e.dm=1;document.body.appendChild(e);tags.push([new T.Vector3((x1+x2)/2,.35,(z1+z2)/2),e])};
+ST.forEach((s,i)=>{sg([[s[1],.14,0],[s[1],.14,3.7]]);if(i)dim(ST[i-1][1],3.5,s[1],3.5,f1(s[1]-ST[i-1][1]))});
+sg([[AX0,.14,AZ0],[AX1,.14,AZ0],[AX1,.14,AZ0],[AX1,.14,AZ1],[AX1,.14,AZ1],[AX0,.14,AZ1],[AX0,.14,AZ1],[AX0,.14,AZ0],[AX0,.14,AZ1],[AX0,.14,AZ1+1.6],[AX1,.14,AZ1],[AX1,.14,AZ1+1.6],[AX1,.14,AZ0],[AX1+1.6,.14,AZ0],[AX1,.14,AZ1],[AX1+1.6,.14,AZ1]]);
+dim(AX0,AZ1+1.4,AX1,AZ1+1.4,'Panjang lini '+f1(AX1-AX0)+' m');dim(AX1+1.4,AZ0,AX1+1.4,AZ1,'Lebar '+f1(AZ1-AZ0)+' m');
+$('ar').innerHTML='<b>Jarak antar stasiun dan kebutuhan area</b><table>'+ST.slice(1).map((s,i)=>'<tr><td class="mu">'+ST[i][0]+' → '+s[0]+'</td><td>'+f1(s[1]-ST[i][1])+' m</td></tr>').join('')+'<tr><td><b>Panjang lini</b></td><td><b>'+f1(AX1-AX0)+' m</b></td></tr><tr><td><b>Lebar (incl. pallet, forklift)</b></td><td><b>'+f1(AZ1-AZ0)+' m</b></td></tr><tr><td><b>Luas lahan</b></td><td><b>'+Math.round((AX1-AX0)*(AZ1-AZ0))+' m²</b></td></tr><tr><td class="mu">+ akses 1 m tiap sisi</td><td>'+Math.round((AX1-AX0+2)*(AZ1-AZ0+2))+' m²</td></tr></table><div class="r"><button class="b" id="dmb">Sembunyikan garis jarak</button></div>';
+$('dmb').onclick=e=>{dmOn=!dmOn;dg.visible=dmOn;e.target.textContent=dmOn?'Sembunyikan garis jarak':'Tampilkan garis jarak'};
+dim(-6.6,-.68,-6.6,.68,'Lebar susun 1,36 m (engsel ke engsel)');let bgOn=true;
+const kf=v=>String(+v.toFixed(2)).replace('.',','),mDv=pts.reduce((s,p,i)=>i?s+Math.hypot(p[0]-pts[i-1][0],p[1]-pts[i-1][1]):0,0),mCap=mDv*TH*1400*2.25*60;
+const MT=[['Ekstruder','Motor utama ekstruder konis SJSZ 92/188',110,1,'m'],['Ekstruder','Pemanas barrel 73 + die 12',85,1,'p'],['Ekstruder','Feeder + loader vakum',3.7,1,'m'],['Vakum','Pompa vakum kalibrator',5.5,1,'m'],['Vakum','Pompa air pendingin',3,1,'m'],['Haul','Penarik (gearbox)',4,1,'m'],['Laser','Laser CO2 + chiller + exhaust',.5,1,'m'],['Gunting','Servo kereta gunting',1.5,1,'m'],['Gunting','Konveyor rol PU pasca-gunting',.75,1,'m'],['Susun','Applicator label + printer',.5,1,'m'],['Susun','Rol tepi pembawa (gearbox)',.37,2,'m'],['Susun','Screw jack meja angkat (servo)',.75,3,'m'],['Susun','Rol meja penggerak (gearbox + rantai)',1.5,1,'m'],['Packing','Servo unwinder film atas dan bawah',.75,2,'m'],['Packing','Belt packing (gearbox)',1.5,1,'m'],['Packing','Pemanas seal (jaw + rel pinggir)',4,1,'p'],['Pallet','Belt ke pallet (gearbox)',1.1,1,'m'],['Pallet','Power pack hidrolik scissor lift',3,1,'m'],['Utilitas','Kompresor udara (pneumatik)',7.5,1,'m']];
+const mSub=t=>MT.filter(r=>r[4]==t).reduce((s,r)=>s+r[2]*r[3],0),mTot=mSub('m')+mSub('p'),mSk={};MT.forEach(r=>mSk[r[0]]=(mSk[r[0]]||0)+r[2]*r[3]);
+[['Ekstruder','Extruder'],['Vakum','Vakum kalibrator'],['Haul','Haul-off'],['Laser','Laser print (diam)'],['Gunting','Gunting guillotine (pisau naik-turun)'],['Susun','Label (setelah gunting) + susun 5 lembar'],['Packing','Packing tarik-lipat'],['Pallet','Pallet di atas scissor lift']].forEach(([k,n])=>{const t=tags.find(a=>a[1].textContent==n);if(t)t[1].textContent=n+' · '+kf(mSk[k])+' kW'});
+const BR=[['Rol meja angkat Ø60 (2 per rol)','UCFL204 / UCP204',tr.length*2],['Engsel pintu rol tepi (1 per arm)','Flange bearing Ø17-20',arms.length],['Dalam rol tepi Ø40 (2 per rol)','6001-2RS',arms.length*2],['Rol konveyor pasca-gunting Ø100','UCP205',6],['Rol ujung belt packing','UCP206',2],['Rol film, lipat, tarik','UCP205',8],['Pin silang scissor lift','Bushing swing-pin',2]];
+$('mo').innerHTML='<b>Motor listrik dan beban</b><div class="mu">Kapasitas ekstrusi dari profil: '+kf(+mDv.toFixed(2))+' m × 2 mm × 1,4 g/cm³ × 2,25 m/menit ≈ <b>'+Math.round(mCap)+' kg/jam</b></div><table>'+MT.map(r=>'<tr><td class="mu">'+r[0]+'</td><td>'+r[1]+(r[4]=='p'?' <i>(pemanas)</i>':'')+'</td><td>'+r[3]+'×'+kf(r[2])+'</td><td><b>'+kf(r[2]*r[3])+'</b></td></tr>').join('')+'<tr><td colspan="3"><b>Motor terpasang</b></td><td><b>'+kf(mSub('m'))+' kW</b></td></tr><tr><td colspan="3"><b>Pemanas</b></td><td><b>'+kf(mSub('p'))+' kW</b></td></tr><tr><td colspan="3"><b>Total terpasang</b></td><td><b>'+kf(mTot)+' kW</b></td></tr><tr><td colspan="3" class="mu">Perkiraan beban jalan (faktor 0,6)</td><td>'+kf(mTot*.6)+' kW</td></tr><tr><td colspan="3" class="mu">Arus 380 V 3 fasa, cos φ 0,85: terpasang / jalan</td><td>'+Math.round(mTot*1000/(1.732*380*.85))+' / '+Math.round(mTot*600/(1.732*380*.85))+' A</td></tr></table><div class="mu">Hanya ekstruder dan pemanas barrel yang mengacu katalog (SJSZ 92/188: motor 90-110 kW; SJSZ 80/156: 55 kW tetapi kapasitas 360-450 kg/jam). Sisanya perkiraan ukuran umum, perlu dikonfirmasi vendor.</div><b>Posisi bearing (kuning di 3D)</b><table>'+BR.map(r=>'<tr><td>'+r[0]+'</td><td class="mu">'+r[1]+'</td><td><b>'+r[2]+'</b></td></tr>').join('')+'</table><div class="mu">Tipe bearing contoh, perlu dikonfirmasi dengan perhitungan beban.</div>';
+if(document.body.clientWidth<900)$('mo').classList.add('off');
+const bgt=(x,y,z,t)=>{const e=document.createElement('div');e.className='tg bgt';e.textContent=t;e.bg=1;document.body.appendChild(e);tags.push([new T.Vector3(x,y,z),e])};
+bgt(-2.5,.8,.5,'Bearing rol meja ×'+tr.length*2);bgt(-1.6,1.2,.8,'Bearing engsel pintu ×'+arms.length);bgt(-7.4,1.15,.85,'Bearing rol konveyor ×6');bgt(XA,.95,.9,'Bearing rol belt ×2');bgt(MX-.35,2.6,.7,'Bearing rol film ×8');bgt(PX,.6,.6,'Bushing scissor ×2');
+
+const P={all:{tx:-8,ty:1,tz:0,d:44,az:.28,el:.5},ext:{tx:-20,ty:1.3,tz:0,d:15,az:.6,el:.35},las:{tx:-6.5,ty:1.1,tz:0,d:12,az:.5,el:.4},cut:{tx:-3,ty:1,tz:0,d:15,az:.45,el:.4},pak:{tx:4,ty:.8,tz:0,d:20,az:.4,el:.42},pal:{tx:9.5,ty:.5,tz:0,d:20,az:.55,el:.45},top:{tx:-8,ty:0,tz:1,d:56,az:0,el:1.45}};
+let G={...P.all},Cc={...P.all},innerW=1,innerH=1;
+const go=n=>{G={...P[n]};if(n=='all'||n=='top')G.d*=Math.max(1,1.8/C.aspect)};
+[['all','Seluruh lini'],['ext','Ekstruder'],['las','Laser + gunting'],['cut','Label + susun'],['pak','Packing'],['pal','Pallet'],['top','Denah + jarak']].forEach(([n,t])=>{const b=document.createElement('button');b.className='b';b.textContent=t;b.onclick=()=>go(n);$('cm').appendChild(b)});
+[['Motor + kW',()=>$('mo').classList.toggle('off')],['Bearing on/off',()=>{bgOn=!bgOn;brg.forEach(m=>m.visible=bgOn)}]].forEach(([t,f])=>{const b=document.createElement('button');b.className='b';b.textContent=t;b.onclick=f;$('cm').appendChild(b)});
+$('pz').onclick=e=>{pz=!pz;e.target.textContent=pz?'Lanjut':'Jeda'};$('sp').oninput=e=>{sp=+e.target.value;tl.textContent='×'+Math.round(40*sp)};
+function rs(){innerW=document.body.clientWidth;innerH=document.body.clientHeight;R.setSize(innerW,innerH);C.aspect=innerW/innerH;C.updateProjectionMatrix()}
+addEventListener('resize',()=>{rs();go('all')});rs();go('all');Cc={...G};
+const ps=new Map();
+D.onpointerdown=e=>{D.setPointerCapture(e.pointerId);ps.set(e.pointerId,e)};
+D.onpointermove=e=>{const o=ps.get(e.pointerId);if(!o)return;
+ if(ps.size==1){G.az-=(e.clientX-o.clientX)*.006;G.el=cl(G.el+(e.clientY-o.clientY)*.006,.05,1.45)}
+ else{const q=[...ps.values()].find(v=>v.pointerId!=e.pointerId),a=Math.hypot(o.clientX-q.clientX,o.clientY-q.clientY),b=Math.hypot(e.clientX-q.clientX,e.clientY-q.clientY);G.d=cl(G.d*a/Math.max(b,1),6,95)}
+ ps.set(e.pointerId,e)};
+D.onpointerup=D.onpointercancel=e=>ps.delete(e.pointerId);
+D.onwheel=e=>{G.d=cl(G.d*(1+e.deltaY*.001),6,95)};
+loop();
+</script></body></html>
